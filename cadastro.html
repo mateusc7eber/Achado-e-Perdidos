@@ -63,7 +63,7 @@
   <form id="formCadastro">
     <input type="text" id="nome" placeholder="Seu nome completo" required />
     <input type="email" id="email" placeholder="Seu e-mail" required />
-    <input type="tel" id="telefone" placeholder="Seu telefone" required />
+    <input type="tel" id="telefone" placeholder="Seu telefone (com DDD)" required />
     <select id="categoria" required>
       <option value="">Selecione o tipo de objeto</option>
       <option value="Celular">Celular</option>
@@ -107,11 +107,12 @@
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         msg.textContent = "Enviando...";
+        msg.style.color = "lime";
 
         const protocolo = `MT#${Math.floor(1000 + Math.random() * 9000)}@`;
         const nome = form.nome.value;
         const email = form.email.value;
-        const telefone = form.telefone.value;
+        const telefone = form.telefone.value.replace(/\D/g, '');
         const categoria = form.categoria.value;
         const marca = form.marca.value;
         const cor = form.cor.value;
@@ -129,10 +130,11 @@
           msg.innerHTML = `✅ Cadastro realizado com sucesso!<br><strong>Protocolo:</strong> ${protocolo}`;
 
           if (notificar === "Email") {
+            console.log("Enviando email para:", email);
             emailjs.send("service_245fs5e", "template_6aahmf8", {
               to_email: email,
               from_name: "Achados e Perdidos - SPTerminais",
-              message: `Olá, ${nome}!\nSeu cadastro foi realizado com sucesso.\nSeu número de protocolo é: ${protocolo}`
+              message: `Olá, ${nome}!\nSeu protocolo é: ${protocolo}`
             }).then(() => {
               alert("📧 Protocolo enviado por e-mail!");
             }).catch((err) => {
@@ -140,7 +142,8 @@
               alert("❌ Falha ao enviar e-mail.");
             });
           } else if (notificar === "WhatsApp") {
-            alert("📲 WhatsApp Simulado:\nOlá, " + nome + "! Seu protocolo é: " + protocolo);
+            console.log("Abrindo WhatsApp para:", telefone);
+            window.open(`https://wa.me/55${telefone}?text=Olá! Seu protocolo é: ${protocolo}`, "_blank");
           }
 
           form.reset();
