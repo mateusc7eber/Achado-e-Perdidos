@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Objetos Perdidos</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Consulta de Objetos Perdidos</h1>
+  </header>
+  <main>
+    <form id="formConsulta">
+      <input type="text" id="busca" placeholder="Ex: celular samsung preto" required>
+      <select id="categoria">
+        <option value="">Filtrar por tipo</option>
+        <option value="Celular">Celular</option>
+        <option value="Documento">Documento</option>
+        <option value="Mochila">Mochila</option>
+        <option value="Roupa">Roupa</option>
+        <option value="Outro">Outro</option>
+      </select>
+      <button type="submit">Buscar</button>
+    </form>
+    <div id="resultados"></div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
+        authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
+        projectId: "achados-e-perdidos-d42d4",
+        storageBucket: "achados-e-perdidos-d42d4.appspot.com",
+        messagingSenderId: "628184249807",
+        appId: "1:628184249807:web:85e216b0ed765cfbc14eba",
+        measurementId: "G-Q6DDCFRRKB"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const form = document.getElementById("formConsulta");
+      const resultadosDiv = document.getElementById("resultados");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        resultadosDiv.innerHTML = "<p>Buscando...</p>";
+
+        const busca = document.getElementById("busca").value.toLowerCase();
+        const categoria = document.getElementById("categoria").value;
+
+        try {
+          const snapshot = await db.collection("cadastros").get();
+          let encontrados = [];
+
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const textoCompleto = `${data.categoria} ${data.marca} ${data.cor} ${data.avarias} ${data.descricao}`.toLowerCase();
+
+            if (
+              textoCompleto.includes(busca) &&
+              (!categoria || data.categoria === categoria) &&
+              data.encontrado
+            ) {
+              encontrados.push(data);
+            }
+          });
+
+          if (encontrados.length > 0) {
+            resultadosDiv.innerHTML = `<p><strong>Encontramos ${encontrados.length} item(ns) semelhante(s). Nossa equipe irá analisar e retornar o contato em até 24 horas.</strong></p>`;
+            encontrados.forEach(item => {
+              resultadosDiv.innerHTML += `<div style='border: 1px solid #ccc; padding: 1em; margin-top: 1em;'>
+                <p><strong>Categoria:</strong> ${item.categoria}</p>
+                <p><strong>Cor:</strong> ${item.cor}</p>
+                <p><strong>Marca:</strong> ${item.marca}</p>
+                <p><strong>Descrição resumida:</strong> ${item.descricao}</p>
+              </div>`;
+            });
+          } else {
+            resultadosDiv.innerHTML = `<p><strong>Nenhum item correspondente foi localizado ainda. Continuaremos monitorando os cadastros.</strong></p>`;
+          }
+        } catch (error) {
+          resultadosDiv.innerHTML = `<p>Erro na busca. Tente novamente.</p>`;
+          console.error("Erro na consulta:", error);
+        }
+      });
+    });
+  </script>
+
+  <footer>
+    <small>Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.</small>
+  </footer>
+</body>
+</html>
