@@ -11,7 +11,7 @@
     <h1>Login Administrativo</h1>
   </header>
   <main>
-    <form id="formLogin" style="max-width:500px; margin:auto; display:flex; flex-direction:column; gap:0.8em;">
+    <form id="formLogin">
       <input type="text" id="usuario" placeholder="Usuário" required />
       <input type="password" id="senha" placeholder="Senha" required />
       <button type="submit">Entrar</button>
@@ -32,7 +32,20 @@
         mensagem.textContent = "Usuário ou senha incorretos. Tente novamente.";
       }
     });
-  </script>
+  
+      // Registro de visita no Firestore
+      try {
+        const db = firebase.firestore();
+        db.collection("visitas").add({
+          data: new Date().toISOString(),
+          ip: null,
+          userAgent: navigator.userAgent
+        });
+      } catch(e) {
+        console.warn("Erro ao registrar visita:", e);
+      }
+
+</script>
 
   <footer>
     <small>

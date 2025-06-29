@@ -5,9 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estatísticas do Sistema</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
+      // Registro de visita no Firestore
+      try {
+        const db = firebase.firestore();
+        db.collection("visitas").add({
+          data: new Date().toISOString(),
+          ip: null,
+          userAgent: navigator.userAgent
+        });
+      } catch(e) {
+        console.warn("Erro ao registrar visita:", e);
+      }
+
+</script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
+      // Registro de visita no Firestore
+      try {
+        const db = firebase.firestore();
+        db.collection("visitas").add({
+          data: new Date().toISOString(),
+          ip: null,
+          userAgent: navigator.userAgent
+        });
+      } catch(e) {
+        console.warn("Erro ao registrar visita:", e);
+      }
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+      // Registro de visita no Firestore
+      try {
+        const db = firebase.firestore();
+        db.collection("visitas").add({
+          data: new Date().toISOString(),
+          ip: null,
+          userAgent: navigator.userAgent
+        });
+      } catch(e) {
+        console.warn("Erro ao registrar visita:", e);
+      }
+
+</script>
 </head>
 <body>
   <header>
@@ -73,7 +112,20 @@
         });
       });
     });
-  </script>
+  
+      // Registro de visita no Firestore
+      try {
+        const db = firebase.firestore();
+        db.collection("visitas").add({
+          data: new Date().toISOString(),
+          ip: null,
+          userAgent: navigator.userAgent
+        });
+      } catch(e) {
+        console.warn("Erro ao registrar visita:", e);
+      }
+
+</script>
 
   <footer>
     <small>Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.</small>

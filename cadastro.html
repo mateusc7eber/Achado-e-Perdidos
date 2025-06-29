@@ -7,8 +7,6 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
 <body>
   <header>
@@ -19,7 +17,6 @@
       <input type="text" id="nome" placeholder="Seu nome completo" required />
       <input type="email" id="email" placeholder="Seu e-mail" required />
       <input type="tel" id="telefone" placeholder="Seu telefone" required />
-
       <select id="categoria" required>
         <option value="">Selecione o tipo de objeto</option>
         <option value="Celular">Celular</option>
@@ -28,28 +25,22 @@
         <option value="Roupa">Roupa</option>
         <option value="Outro">Outro</option>
       </select>
-
       <input type="text" id="marca" placeholder="Marca / Modelo" required />
       <input type="text" id="cor" placeholder="Cor predominante" required />
       <input type="text" id="avarias" placeholder="Possui avarias? Se sim, descreva" required />
       <textarea id="descricao" placeholder="Outras informações relevantes"></textarea>
-
-      <label for="notificar">Como deseja receber o protocolo?</label>
       <select id="notificar" required>
-        <option value="WhatsApp">WhatsApp</option>
-        <option value="Email">E-mail</option>
-        <option value="Nenhum">Nenhum</option>
+        <option value="WhatsApp">Receber protocolo por WhatsApp</option>
+        <option value="Email">Receber protocolo por Email</option>
+        <option value="Nenhum">Não desejo confirmação</option>
       </select>
-
       <button type="submit">Cadastrar</button>
     </form>
-    <p id="mensagem" style="text-align:center; margin-top:1em;"></p>
+    <p id="mensagem" style="text-align:center; margin-top:1em; color:lime;"></p>
   </main>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      emailjs.init("OtUyvVddQ5UhUm4s1uP7E");
-
       const firebaseConfig = {
         apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
         authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
@@ -62,83 +53,57 @@
 
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
-      const { jsPDF } = window.jspdf;
 
-      document.getElementById("formCadastro").addEventListener("submit", async (e) => {
+      // Gravar visita
+      db.collection("visitas").add({
+        data: new Date().toISOString(),
+        ip: null,
+        userAgent: navigator.userAgent
+      });
+
+      const form = document.getElementById("formCadastro");
+      const msg = document.getElementById("mensagem");
+
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
+        msg.textContent = "Enviando...";
 
-        const nome = document.getElementById("nome").value;
-        const email = document.getElementById("email").value;
-        const telefone = document.getElementById("telefone").value;
-        const categoria = document.getElementById("categoria").value;
-        const marca = document.getElementById("marca").value;
-        const cor = document.getElementById("cor").value;
-        const avarias = document.getElementById("avarias").value;
-        const descricao = document.getElementById("descricao").value;
-        const notificar = document.getElementById("notificar").value;
         const protocolo = `MT#${Math.floor(1000 + Math.random() * 9000)}@`;
-        const mensagem = document.getElementById("mensagem");
+        const cadastro = {
+          nome: form.nome.value,
+          email: form.email.value,
+          telefone: form.telefone.value,
+          categoria: form.categoria.value,
+          marca: form.marca.value,
+          cor: form.cor.value,
+          avarias: form.avarias.value,
+          descricao: form.descricao.value,
+          notificar: form.notificar.value,
+          protocolo: protocolo,
+          encontrado: false,
+          dataCadastro: new Date().toISOString()
+        };
 
         try {
-          await db.collection("cadastros").add({
-            nome, email, telefone, categoria, marca, cor, avarias, descricao,
-            notificar, protocolo,
-            encontrado: false,
-            dataCadastro: new Date().toISOString()
-          });
-
-          mensagem.innerHTML = `
-            <strong>Registro manifestado com sucesso!</strong><br>
-            Protocolo: <strong>${protocolo}</strong><br>
-            <em>O comprovante será baixado automaticamente.</em>
-          `;
-
-          // PDF
-          const doc = new jsPDF();
-          doc.setFontSize(14);
-          doc.text("Comprovante de Registro - Achados e Perdidos", 20, 20);
-          doc.setFontSize(11);
-          doc.text(`Protocolo: ${protocolo}`, 20, 30);
-          doc.text(`Nome: ${nome}`, 20, 40);
-          doc.text(`Telefone: ${telefone}`, 20, 50);
-          doc.text(`Email: ${email}`, 20, 60);
-          doc.text(`Categoria: ${categoria}`, 20, 70);
-          doc.text(`Marca: ${marca}`, 20, 80);
-          doc.text(`Cor: ${cor}`, 20, 90);
-          doc.text(`Avarias: ${avarias}`, 20, 100);
-          doc.text(`Descrição: ${descricao}`, 20, 110);
-          doc.text(`Data: ${new Date().toLocaleString()}`, 20, 120);
-          doc.save(`Protocolo_${protocolo}.pdf`);
-
-          // Envio de notificação real
-          if (notificar === "Email") {
-            emailjs.send("service_245fs5e", "template_6aahmf8", {
-              to_email: email,
-              from_name: "Achados e Perdidos - SPTerminais",
-              message: `Olá, ${nome}!\nSeu registro foi realizado com sucesso.\nSeu número de protocolo é: ${protocolo}\nNossa equipe entrará em contato em breve.`
-            }).then(() => {
-              alert("📧 E-mail enviado com sucesso!");
-            }, (err) => {
-              alert("Erro ao enviar e-mail.");
-              console.error("Erro no emailjs:", err);
-            });
-          } else if (notificar === "WhatsApp") {
-            alert("📲 WhatsApp Simulado:\n\nOlá! Cadastro realizado com sucesso! Protocolo: " + protocolo);
+          await db.collection("cadastros").add(cadastro);
+          msg.innerHTML = `<strong>✅ Cadastro realizado com sucesso!</strong><br>Protocolo: <strong>${protocolo}</strong>`;
+          if (cadastro.notificar === "WhatsApp") {
+            alert("📲 WhatsApp Simulado:\nOlá! Seu protocolo é: " + protocolo);
+          } else if (cadastro.notificar === "Email") {
+            alert("📧 E-mail Simulado:\nProtocolo enviado para: " + cadastro.email);
           }
-
-          document.getElementById("formCadastro").reset();
-        } catch (error) {
-          mensagem.textContent = "Erro ao registrar o item. Tente novamente.";
-          console.error("Erro ao salvar:", error);
+          form.reset();
+        } catch (err) {
+          console.error("Erro no cadastro:", err);
+          msg.style.color = "red";
+          msg.textContent = "❌ Erro ao registrar. Tente novamente.";
         }
       });
     });
   </script>
 
   <footer>
-    <small>
-      Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.
-    </small>
+    <small>Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.</small>
   </footer>
 </body>
 </html>
