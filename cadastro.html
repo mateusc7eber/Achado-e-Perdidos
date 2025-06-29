@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Objeto Perdido</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Cadastro de Objeto Perdido</h1>
+  </header>
+  <main>
+    <form id="formCadastro">
+      <input type="text" id="nome" placeholder="Seu nome completo" required />
+      <input type="email" id="email" placeholder="Seu e-mail" required />
+      <input type="tel" id="telefone" placeholder="Seu telefone" required />
+
+      <select id="categoria" required>
+        <option value="">Selecione o tipo de objeto</option>
+        <option value="Celular">Celular</option>
+        <option value="Documento">Documento</option>
+        <option value="Mochila">Mochila</option>
+        <option value="Roupa">Roupa</option>
+        <option value="Outro">Outro</option>
+      </select>
+
+      <input type="text" id="marca" placeholder="Marca / Modelo" required />
+      <input type="text" id="cor" placeholder="Cor predominante" required />
+      <input type="text" id="avarias" placeholder="Possui avarias? Se sim, descreva" required />
+      <textarea id="descricao" placeholder="Outras informações relevantes"></textarea>
+
+      <label for="notificar">Como deseja receber o protocolo?</label>
+      <select id="notificar" required>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Email">E-mail</option>
+        <option value="Nenhum">Nenhum</option>
+      </select>
+
+      <button type="submit">Cadastrar</button>
+    </form>
+    <p id="mensagem" style="text-align:center; margin-top:1em;"></p>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
+        authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
+        projectId: "achados-e-perdidos-d42d4",
+        storageBucket: "achados-e-perdidos-d42d4.appspot.com",
+        messagingSenderId: "628184249807",
+        appId: "1:628184249807:web:85e216b0ed765cfbc14eba",
+        measurementId: "G-Q6DDCFRRKB"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      document.getElementById("formCadastro").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const nome = document.getElementById("nome").value;
+        const email = document.getElementById("email").value;
+        const telefone = document.getElementById("telefone").value;
+        const categoria = document.getElementById("categoria").value;
+        const marca = document.getElementById("marca").value;
+        const cor = document.getElementById("cor").value;
+        const avarias = document.getElementById("avarias").value;
+        const descricao = document.getElementById("descricao").value;
+        const notificar = document.getElementById("notificar").value;
+        const protocolo = `MT#${Math.floor(1000 + Math.random() * 9000)}@`;
+        const mensagem = document.getElementById("mensagem");
+
+        try {
+          await db.collection("cadastros").add({
+            nome, email, telefone, categoria, marca, cor, avarias, descricao,
+            notificar, protocolo,
+            encontrado: false,
+            dataCadastro: new Date().toISOString()
+          });
+
+          let aviso = `Registro manifestado com sucesso!\nProtocolo: ${protocolo}`;
+          mensagem.innerHTML = `<strong>${aviso.replace(/\n/g, '<br>')}</strong>`;
+
+          if (notificar === "WhatsApp") {
+            alert("📲 WhatsApp Simulado:\n\nOlá! Cadastro realizado com sucesso!\nProtocolo: " + protocolo + "\nNossa equipe entrará em contato em breve.");
+          } else if (notificar === "Email") {
+            alert("📧 E-mail Simulado:\n\nEnviado para: " + email + "\nOlá! Seu cadastro foi realizado com sucesso.\nProtocolo: " + protocolo + "\nAguarde o retorno de nossa equipe.");
+          }
+
+          document.getElementById("formCadastro").reset();
+        } catch (error) {
+          mensagem.textContent = "Erro ao registrar o item. Tente novamente.";
+          console.error("Erro ao salvar:", error);
+        }
+      });
+    });
+  </script>
+
+  <footer>
+    <small>
+      Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.
+    </small>
+  </footer>
+</body>
+</html>
