@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Administrativo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Login Administrativo</h1>
+  </header>
+  <main>
+    <form id="formLogin" style="max-width:500px; margin:auto; display:flex; flex-direction:column; gap:0.8em;">
+      <input type="text" id="usuario" placeholder="Usuário" required />
+      <input type="password" id="senha" placeholder="Senha" required />
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="mensagem" style="text-align:center; margin-top:1em;"></p>
+  </main>
+
+  <script>
+    document.getElementById("formLogin").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const usuario = document.getElementById("usuario").value;
+      const senha = document.getElementById("senha").value;
+      const mensagem = document.getElementById("mensagem");
+
+      if (usuario === "SPTerminais" && senha === "TPH@123") {
+        window.location.href = "painel.html";
+      } else {
+        mensagem.textContent = "Usuário ou senha incorretos. Tente novamente.";
+      }
+    });
+  </script>
+
+  <footer>
+    <small>
+      Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.
+    </small>
+  </footer>
+</body>
+</html>

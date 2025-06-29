@@ -5,18 +5,20 @@ body {
   margin: 0;
   padding: 0;
 }
-header, footer {
+
+header {
   text-align: center;
-  padding: 1em;
+  padding: 2em 1em 1em;
 }
+
+h1, h2 {
+  margin: 0.2em 0;
+}
+
 main {
-  padding: 2em;
+  padding: 2em 1em;
 }
-a {
-  color: #00ffff;
-  text-decoration: none;
-  margin: 0 1em;
-}
+
 form {
   max-width: 500px;
   margin: auto;
@@ -24,16 +26,37 @@ form {
   flex-direction: column;
   gap: 0.8em;
 }
+
 input, select, textarea {
-  padding: 0.5em;
-  border-radius: 5px;
+  padding: 0.7em;
+  border-radius: 6px;
   border: none;
+  font-size: 1em;
 }
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
 button {
   background-color: #00aaff;
   color: white;
   padding: 0.7em;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0088cc;
+}
+
+footer {
+  text-align: center;
+  padding: 1em;
+  font-size: 0.9em;
+  color: #ccc;
 }
