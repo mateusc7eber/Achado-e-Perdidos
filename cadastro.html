@@ -7,55 +7,19 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body {
-      background-color: #051a2b;
-      color: white;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 1em;
-      font-size: 2em;
-    }
-    form {
-      max-width: 600px;
-      margin: 1em auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 1em;
-    }
+    body { background: #051a2b; color: white; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    h1 { text-align: center; margin-top: 1em; font-size: 2em; }
+    form { max-width: 600px; margin: 1em auto; display: flex; flex-direction: column; gap: 10px; padding: 1em; }
     input, select, textarea, button {
-      padding: 10px;
-      font-size: 1em;
-      border: none;
-      border-radius: 6px;
+      padding: 10px; font-size: 1em; border: none; border-radius: 6px;
     }
-    input, select, textarea {
-      background-color: #e7f0fc;
-    }
-    button {
-      background-color: #00aaff;
-      color: white;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background-color: #0099dd;
-    }
-    #mensagem {
-      text-align: center;
-      margin-top: 1em;
-      color: lime;
-    }
-    footer {
-      text-align: center;
-      margin-top: 2em;
-      font-size: 0.8em;
-    }
+    input, select, textarea { background: #e7f0fc; }
+    button { background: #00aaff; color: white; cursor: pointer; }
+    button:hover { background: #0099dd; }
+    #mensagem { text-align: center; margin-top: 1em; color: lime; }
+    footer { text-align: center; margin-top: 2em; font-size: 0.8em; }
   </style>
 </head>
 <body>
@@ -88,6 +52,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       emailjs.init("OtUyvVddQ5UhUm4s1uP7E");
+      const { jsPDF } = window.jspdf;
 
       const firebaseConfig = {
         apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
@@ -106,8 +71,7 @@
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        msg.textContent = "Enviando...";
-        msg.style.color = "lime";
+        msg.textContent = "⏳ Enviando...";
 
         const protocolo = `MT#${Math.floor(1000 + Math.random() * 9000)}@`;
         const nome = form.nome.value;
@@ -129,8 +93,24 @@
 
           msg.innerHTML = `✅ Cadastro realizado com sucesso!<br><strong>Protocolo:</strong> ${protocolo}`;
 
+          // PDF com jsPDF
+          const doc = new jsPDF();
+          doc.setFontSize(16);
+          doc.text("Comprovante - Achados e Perdidos", 20, 20);
+          doc.setFontSize(12);
+          doc.text(`Protocolo: ${protocolo}`, 20, 30);
+          doc.text(`Nome: ${nome}`, 20, 40);
+          doc.text(`Telefone: ${telefone}`, 20, 50);
+          doc.text(`Email: ${email}`, 20, 60);
+          doc.text(`Objeto: ${categoria}`, 20, 70);
+          doc.text(`Marca: ${marca}`, 20, 80);
+          doc.text(`Cor: ${cor}`, 20, 90);
+          doc.text(`Avarias: ${avarias}`, 20, 100);
+          doc.text(`Descrição: ${descricao}`, 20, 110);
+          doc.text(`Data: ${new Date().toLocaleString()}`, 20, 120);
+          doc.save(`Protocolo_${protocolo}.pdf`);
+
           if (notificar === "Email") {
-            console.log("Enviando email para:", email);
             emailjs.send("service_245fs5e", "template_6aahmf8", {
               to_email: email,
               from_name: "Achados e Perdidos - SPTerminais",
@@ -142,7 +122,6 @@
               alert("❌ Falha ao enviar e-mail.");
             });
           } else if (notificar === "WhatsApp") {
-            console.log("Abrindo WhatsApp para:", telefone);
             window.open(`https://wa.me/55${telefone}?text=Olá! Seu protocolo é: ${protocolo}`, "_blank");
           }
 
