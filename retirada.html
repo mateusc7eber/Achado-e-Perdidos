@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitação de Retirada</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Solicitação de Retirada</h1>
+  </header>
+  <main>
+    <form id="formRetirada">
+      <input type="text" id="protocolo" placeholder="Digite seu número de protocolo" required>
+      <input type="text" id="nome" placeholder="Seu nome completo" required>
+      <input type="tel" id="telefone" placeholder="Seu telefone" required>
+      <button type="submit">Solicitar Retirada</button>
+    </form>
+    <p id="mensagem" style="text-align:center; margin-top:1em;"></p>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
+        authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
+        projectId: "achados-e-perdidos-d42d4",
+        storageBucket: "achados-e-perdidos-d42d4.appspot.com",
+        messagingSenderId: "628184249807",
+        appId: "1:628184249807:web:85e216b0ed765cfbc14eba",
+        measurementId: "G-Q6DDCFRRKB"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const form = document.getElementById("formRetirada");
+      const msg = document.getElementById("mensagem");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const protocolo = document.getElementById("protocolo").value.trim();
+        const nome = document.getElementById("nome").value.trim();
+        const telefone = document.getElementById("telefone").value.trim();
+
+        try {
+          const query = await db.collection("cadastros").where("protocolo", "==", protocolo).get();
+          if (!query.empty) {
+            const doc = query.docs[0];
+            await db.collection("retiradas").add({
+              nome, telefone, protocolo,
+              dataSolicitacao: new Date().toISOString()
+            });
+            msg.innerHTML = "Solicitação registrada com sucesso! Nossa equipe analisará e entrará em contato em breve.";
+            form.reset();
+          } else {
+            msg.innerText = "Protocolo não localizado. Verifique se digitou corretamente.";
+          }
+        } catch (error) {
+          msg.innerText = "Erro ao registrar solicitação. Tente novamente.";
+          console.error("Erro na retirada:", error);
+        }
+      });
+    });
+  </script>
+
+  <footer>
+    <small>Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.</small>
+  </footer>
+</body>
+</html>
