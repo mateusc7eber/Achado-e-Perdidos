@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
 <body>
   <header>
@@ -46,6 +48,8 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      emailjs.init("OtUyvVddQ5UhUm4s1uP7E");
+
       const firebaseConfig = {
         apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
         authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
@@ -58,6 +62,7 @@
 
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
+      const { jsPDF } = window.jspdf;
 
       document.getElementById("formCadastro").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -82,13 +87,43 @@
             dataCadastro: new Date().toISOString()
           });
 
-          let aviso = `Registro manifestado com sucesso!\nProtocolo: ${protocolo}`;
-          mensagem.innerHTML = `<strong>${aviso.replace(/\n/g, '<br>')}</strong>`;
+          mensagem.innerHTML = `
+            <strong>Registro manifestado com sucesso!</strong><br>
+            Protocolo: <strong>${protocolo}</strong><br>
+            <em>O comprovante será baixado automaticamente.</em>
+          `;
 
-          if (notificar === "WhatsApp") {
-            alert("📲 WhatsApp Simulado:\n\nOlá! Cadastro realizado com sucesso!\nProtocolo: " + protocolo + "\nNossa equipe entrará em contato em breve.");
-          } else if (notificar === "Email") {
-            alert("📧 E-mail Simulado:\n\nEnviado para: " + email + "\nOlá! Seu cadastro foi realizado com sucesso.\nProtocolo: " + protocolo + "\nAguarde o retorno de nossa equipe.");
+          // PDF
+          const doc = new jsPDF();
+          doc.setFontSize(14);
+          doc.text("Comprovante de Registro - Achados e Perdidos", 20, 20);
+          doc.setFontSize(11);
+          doc.text(`Protocolo: ${protocolo}`, 20, 30);
+          doc.text(`Nome: ${nome}`, 20, 40);
+          doc.text(`Telefone: ${telefone}`, 20, 50);
+          doc.text(`Email: ${email}`, 20, 60);
+          doc.text(`Categoria: ${categoria}`, 20, 70);
+          doc.text(`Marca: ${marca}`, 20, 80);
+          doc.text(`Cor: ${cor}`, 20, 90);
+          doc.text(`Avarias: ${avarias}`, 20, 100);
+          doc.text(`Descrição: ${descricao}`, 20, 110);
+          doc.text(`Data: ${new Date().toLocaleString()}`, 20, 120);
+          doc.save(`Protocolo_${protocolo}.pdf`);
+
+          // Envio de notificação real
+          if (notificar === "Email") {
+            emailjs.send("service_245fs5e", "template_6aahmf8", {
+              to_email: email,
+              from_name: "Achados e Perdidos - SPTerminais",
+              message: `Olá, ${nome}!\nSeu registro foi realizado com sucesso.\nSeu número de protocolo é: ${protocolo}\nNossa equipe entrará em contato em breve.`
+            }).then(() => {
+              alert("📧 E-mail enviado com sucesso!");
+            }, (err) => {
+              alert("Erro ao enviar e-mail.");
+              console.error("Erro no emailjs:", err);
+            });
+          } else if (notificar === "WhatsApp") {
+            alert("📲 WhatsApp Simulado:\n\nOlá! Cadastro realizado com sucesso! Protocolo: " + protocolo);
           }
 
           document.getElementById("formCadastro").reset();

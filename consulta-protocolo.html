@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Protocolo</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Consultar Protocolo</h1>
+    <p style="text-align:center;">Verifique se seu objeto já foi localizado ou retirado</p>
+  </header>
+  <main>
+    <form id="formConsulta" style="max-width:500px; margin:auto;">
+      <input type="text" id="protocolo" placeholder="Digite seu número de protocolo" required />
+      <button type="submit">Consultar</button>
+    </form>
+    <div id="resultado" style="text-align:center; margin-top:2em;"></div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
+        authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
+        projectId: "achados-e-perdidos-d42d4",
+        storageBucket: "achados-e-perdidos-d42d4.appspot.com",
+        messagingSenderId: "628184249807",
+        appId: "1:628184249807:web:85e216b0ed765cfbc14eba",
+        measurementId: "G-Q6DDCFRRKB"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const form = document.getElementById("formConsulta");
+      const resultado = document.getElementById("resultado");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const protocolo = document.getElementById("protocolo").value.trim();
+        resultado.innerHTML = "<p>🔎 Buscando informações...</p>";
+
+        try {
+          const snap = await db.collection("cadastros").where("protocolo", "==", protocolo).get();
+
+          if (snap.empty) {
+            resultado.innerHTML = "<p><strong>Protocolo não localizado.</strong><br>Verifique se digitou corretamente.</p>";
+            return;
+          }
+
+          const dados = snap.docs[0].data();
+          let status = "⏳ Aguardando análise";
+
+          if (dados.encontrado && !dados.retiradoPor) {
+            status = "✅ Objeto localizado - Aguardando retirada";
+          } else if (dados.retiradoPor) {
+            status = "📦 Objeto entregue a: " + dados.retiradoPor + " em " + (dados.dataRetirada || "data não registrada");
+          }
+
+          resultado.innerHTML = `
+            <p><strong>Status:</strong> ${status}</p>
+            <p><strong>Nome:</strong> ${dados.nome}</p>
+            <p><strong>Categoria:</strong> ${dados.categoria}</p>
+            <p><strong>Marca:</strong> ${dados.marca}</p>
+            <p><strong>Cor:</strong> ${dados.cor}</p>
+            <p><strong>Protocolo:</strong> ${dados.protocolo}</p>
+          `;
+        } catch (err) {
+          resultado.innerHTML = "<p>Erro na consulta. Tente novamente.</p>";
+          console.error("Erro na consulta:", err);
+        }
+      });
+    });
+  </script>
+
+  <footer>
+    <small>
+      Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.
+    </small>
+  </footer>
+</body>
+</html>
