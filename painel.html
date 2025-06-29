@@ -1,19 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel Administrativo</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    body {
+      background-color: #051a2b;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      background-color: #051a2b;
+      padding: 2em 0 1em;
+    }
+    header h1 {
+      font-size: 2em;
+      font-weight: bold;
+      margin: 0;
+    }
+    nav a {
+      color: #00ccff;
+      text-decoration: none;
+      margin: 0 1.5em;
+      font-size: 1.1em;
+    }
+    .registro {
+      background-color: #062b44;
+      border: 1px solid #00aaff;
+      border-radius: 10px;
+      margin: 1em auto;
+      padding: 1em;
+      max-width: 700px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    button {
+      margin-top: 0.5em;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2em;
+      padding-bottom: 1em;
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Painel Administrativo</h1>
+    <nav>
+      <a href="visitas-admin.html">📋 Ver Registros de Visitas</a>
+      <a href="estatisticas.html">📊 Ver Estatísticas</a>
+    </nav>
   </header>
   <main>
-    <div id="dados"></div>
+    <div id="dados" style="padding: 1em;"></div>
   </main>
 
   <script>
@@ -34,13 +80,7 @@
       function renderizarCadastro(doc) {
         const d = doc.data();
         const div = document.createElement("div");
-        div.style.background = "#062b44";
-        div.style.color = "white";
-        div.style.border = "1px solid #00aaff";
-        div.style.borderRadius = "8px";
-        div.style.margin = "1em auto";
-        div.style.padding = "1em";
-        div.style.maxWidth = "700px";
+        div.className = "registro";
 
         div.innerHTML = `
           <p><strong>Nome:</strong> ${d.nome}</p>
@@ -51,19 +91,14 @@
           <p><strong>Cor:</strong> ${d.cor}</p>
           <p><strong>Avarias:</strong> ${d.avarias}</p>
           <p><strong>Descrição:</strong> ${d.descricao}</p>
-          <p><strong>Forma de notificação:</strong> ${d.notificar}</p>
           <p><strong>Protocolo:</strong> ${d.protocolo}</p>
-          <p><strong>Data do Cadastro:</strong> ${new Date(d.dataCadastro).toLocaleString()}</p>
           <p><strong>Encontrado:</strong> 
-            <input type="checkbox" ${d.encontrado ? "checked" : ""} 
-            onchange="atualizarEncontrado('${doc.id}', this.checked)">
+            <input type="checkbox" ${d.encontrado ? "checked" : ""} onchange="atualizarEncontrado('${doc.id}', this.checked)">
           </p>
           <p><strong>Retirado por:</strong> 
             <input type="text" id="ret_${doc.id}" value="${d.retiradoPor || ""}" placeholder="Nome da pessoa">
             <button onclick="registrarRetirada('${doc.id}')">Confirmar Retirada</button>
           </p>
-          ${d.dataRetirada ? `<p><strong>Data da Retirada:</strong> ${d.dataRetirada}</p>` : ""}
-          ${d.responsavel ? `<p><strong>Responsável pela entrega:</strong> ${d.responsavel}</p>` : ""}
         `;
         document.getElementById("dados").appendChild(div);
       }
@@ -80,7 +115,7 @@
           dataRetirada: new Date().toLocaleString(),
           responsavel: "Admin SPTerminais"
         }).then(() => {
-          alert("Retirada registrada com sucesso!");
+          alert("Retirada registrada!");
         });
       };
 
@@ -91,6 +126,16 @@
           snapshot.forEach(renderizarCadastro);
         }
       });
+
+      try {
+        db.collection("visitas").add({
+          data: new Date().toISOString(),
+          ip: null,
+          userAgent: navigator.userAgent
+        });
+      } catch(e) {
+        console.warn("Erro ao registrar visita:", e);
+      }
     });
   </script>
 
