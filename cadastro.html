@@ -18,7 +18,14 @@
     input, select, textarea { background: #e7f0fc; }
     button { background: #00aaff; color: white; cursor: pointer; }
     button:hover { background: #0099dd; }
-    #mensagem { text-align: center; margin-top: 1em; color: lime; }
+    #mensagem, #protocoloFinal {
+      text-align: center; margin-top: 1em; color: lime;
+    }
+    #protocoloFinal strong {
+      font-size: 1.3em;
+      display: block;
+      margin-top: 0.3em;
+    }
     footer { text-align: center; margin-top: 2em; font-size: 0.8em; }
   </style>
 </head>
@@ -48,6 +55,7 @@
     <button type="submit">Cadastrar</button>
   </form>
   <p id="mensagem"></p>
+  <div id="protocoloFinal"></div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -68,10 +76,12 @@
       const db = firebase.firestore();
       const form = document.getElementById("formCadastro");
       const msg = document.getElementById("mensagem");
+      const protOut = document.getElementById("protocoloFinal");
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         msg.textContent = "⏳ Enviando...";
+        protOut.innerHTML = "";
 
         const protocolo = `MT#${Math.floor(1000 + Math.random() * 9000)}@`;
         const nome = form.nome.value;
@@ -91,9 +101,9 @@
             dataCadastro: new Date().toISOString()
           });
 
-          msg.innerHTML = `✅ Cadastro realizado com sucesso!<br><strong>Protocolo:</strong> ${protocolo}`;
+          msg.innerHTML = `✅ Cadastro realizado com sucesso!`;
+          protOut.innerHTML = `<strong>Seu número de protocolo é:<br>${protocolo}</strong>`;
 
-          // PDF com jsPDF
           const doc = new jsPDF();
           doc.setFontSize(16);
           doc.text("Comprovante - Achados e Perdidos", 20, 20);
