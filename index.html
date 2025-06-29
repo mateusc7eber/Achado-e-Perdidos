@@ -3,16 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index</title>
+  <title>SPTerminais Noroeste</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <style>
+    body {
+      background-color: #051a2b;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      padding: 2em 0;
+    }
+    header h1 {
+      font-size: 2em;
+      margin-bottom: 0.2em;
+    }
+    nav {
+      text-align: center;
+      margin-top: 1em;
+    }
+    nav a {
+      color: #00ccff;
+      margin: 0 1em;
+      font-size: 1.1em;
+      text-decoration: none;
+    }
+    main {
+      max-width: 700px;
+      margin: auto;
+      text-align: center;
+      padding: 2em;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2em;
+      font-size: 0.8em;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Index</h1>
+    <h1>SPTerminais Noroeste</h1>
+    <nav>
+      <a href="cadastro.html">📥 Cadastrar Objeto</a>
+      <a href="consulta-protocolo.html">🔎 Consultar Protocolo</a>
+      <a href="login.html">🔐 Acesso Administrativo</a>
+    </nav>
   </header>
   <main>
-<p style='text-align:center;'>Bem-vindo ao sistema de Achados e Perdidos da SPTerminais Noroeste.</p><nav style='text-align:center; margin-top:2em;'><a href='cadastro.html'>Cadastro</a> | <a href='consulta.html'>Consulta</a> | <a href='retirada.html'>Retirada</a> | <a href='login.html'>Área Administrativa</a></nav>
+    <p>Bem-vindo ao sistema de Achados e Perdidos dos terminais da região Noroeste.</p>
   </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxHxLncOwxxiC23LLdLh_FIy17QE4ekUU",
+      authDomain: "achados-e-perdidos-d42d4.firebaseapp.com",
+      projectId: "achados-e-perdidos-d42d4",
+      storageBucket: "achados-e-perdidos-d42d4.appspot.com",
+      messagingSenderId: "628184249807",
+      appId: "1:628184249807:web:85e216b0ed765cfbc14eba",
+      measurementId: "G-Q6DDCFRRKB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    try {
+      db.collection("visitas").add({
+        data: new Date().toISOString(),
+        ip: null,
+        userAgent: navigator.userAgent,
+        pagina: "index"
+      });
+    } catch (e) {
+      console.warn("Erro ao registrar visita:", e);
+    }
+  </script>
+
   <footer>
     <small>Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.</small>
   </footer>
