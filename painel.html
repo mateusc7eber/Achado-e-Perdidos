@@ -1,48 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel Administrativo</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
-      // Registro de visita no Firestore
-      try {
-        const db = firebase.firestore();
-        db.collection("visitas").add({
-          data: new Date().toISOString(),
-          ip: null,
-          userAgent: navigator.userAgent
-        });
-      } catch(e) {
-        console.warn("Erro ao registrar visita:", e);
-      }
-
-</script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js">
-      // Registro de visita no Firestore
-      try {
-        const db = firebase.firestore();
-        db.collection("visitas").add({
-          data: new Date().toISOString(),
-          ip: null,
-          userAgent: navigator.userAgent
-        });
-      } catch(e) {
-        console.warn("Erro ao registrar visita:", e);
-      }
-
-</script>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
   <header>
     <h1>Painel Administrativo</h1>
   </header>
   <main>
-    <nav style="text-align:center; margin-bottom: 2em;">
-      <a href="visitas-admin.html" style="color:#00ccff; text-decoration:none; margin-right: 2em;">📋 Ver Registros de Visitas</a>
-      <a href="estatisticas.html" style="color:#00ccff; text-decoration:none;">📊 Ver Estatísticas</a>
-    </nav>
     <div id="dados"></div>
   </main>
 
@@ -60,78 +30,72 @@
 
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
-      const dadosDiv = document.getElementById("dados");
 
       function renderizarCadastro(doc) {
-        const data = doc.data();
-        const container = document.createElement("div");
-        container.style.border = "1px solid #00aaff";
-        container.style.margin = "1em auto";
-        container.style.padding = "1em";
-        container.style.maxWidth = "600px";
-        container.style.borderRadius = "8px";
-        container.style.backgroundColor = "#062b44";
+        const d = doc.data();
+        const div = document.createElement("div");
+        div.style.background = "#062b44";
+        div.style.color = "white";
+        div.style.border = "1px solid #00aaff";
+        div.style.borderRadius = "8px";
+        div.style.margin = "1em auto";
+        div.style.padding = "1em";
+        div.style.maxWidth = "700px";
 
-        container.innerHTML = `
-          <p><strong>Nome:</strong> ${data.nome}</p>
-          <p><strong>Telefone:</strong> ${data.telefone}</p>
-          <p><strong>Email:</strong> ${data.email}</p>
-          <p><strong>Categoria:</strong> ${data.categoria}</p>
-          <p><strong>Marca:</strong> ${data.marca}</p>
-          <p><strong>Cor:</strong> ${data.cor}</p>
-          <p><strong>Avarias:</strong> ${data.avarias}</p>
-          <p><strong>Descrição:</strong> ${data.descricao}</p>
-          <p><strong>Protocolo:</strong> ${data.protocolo}</p>
-          <p><strong>Encontrado:</strong>
-            <input type="checkbox" ${data.encontrado ? "checked" : ""} onchange="atualizarEncontrado('${doc.id}', this.checked)">
+        div.innerHTML = `
+          <p><strong>Nome:</strong> ${d.nome}</p>
+          <p><strong>Email:</strong> ${d.email}</p>
+          <p><strong>Telefone:</strong> ${d.telefone}</p>
+          <p><strong>Categoria:</strong> ${d.categoria}</p>
+          <p><strong>Marca:</strong> ${d.marca}</p>
+          <p><strong>Cor:</strong> ${d.cor}</p>
+          <p><strong>Avarias:</strong> ${d.avarias}</p>
+          <p><strong>Descrição:</strong> ${d.descricao}</p>
+          <p><strong>Forma de notificação:</strong> ${d.notificar}</p>
+          <p><strong>Protocolo:</strong> ${d.protocolo}</p>
+          <p><strong>Data do Cadastro:</strong> ${new Date(d.dataCadastro).toLocaleString()}</p>
+          <p><strong>Encontrado:</strong> 
+            <input type="checkbox" ${d.encontrado ? "checked" : ""} 
+            onchange="atualizarEncontrado('${doc.id}', this.checked)">
           </p>
-          <p><strong>Retirado por:</strong>
-            <input type="text" id="ret_${doc.id}" value="${data.retiradoPor || ""}" placeholder="Nome da pessoa">
+          <p><strong>Retirado por:</strong> 
+            <input type="text" id="ret_${doc.id}" value="${d.retiradoPor || ""}" placeholder="Nome da pessoa">
             <button onclick="registrarRetirada('${doc.id}')">Confirmar Retirada</button>
           </p>
+          ${d.dataRetirada ? `<p><strong>Data da Retirada:</strong> ${d.dataRetirada}</p>` : ""}
+          ${d.responsavel ? `<p><strong>Responsável pela entrega:</strong> ${d.responsavel}</p>` : ""}
         `;
-        dadosDiv.appendChild(container);
+        document.getElementById("dados").appendChild(div);
       }
 
       window.atualizarEncontrado = function(id, status) {
         db.collection("cadastros").doc(id).update({ encontrado: status });
-      }
+      };
 
       window.registrarRetirada = function(id) {
-        const nome = document.getElementById(`ret_${id}`).value;
+        const nome = document.getElementById("ret_" + id).value;
         db.collection("cadastros").doc(id).update({
           retirado: true,
           retiradoPor: nome,
           dataRetirada: new Date().toLocaleString(),
           responsavel: "Admin SPTerminais"
+        }).then(() => {
+          alert("Retirada registrada com sucesso!");
         });
-        alert("Retirada registrada com sucesso!");
-      }
+      };
 
-      db.collection("cadastros").orderBy("dataCadastro", "desc").get()
-        .then(snapshot => {
-          snapshot.forEach(doc => renderizarCadastro(doc));
-        });
+      db.collection("cadastros").orderBy("dataCadastro", "desc").get().then(snapshot => {
+        if (snapshot.empty) {
+          document.getElementById("dados").innerHTML = "<p style='text-align:center;'>Nenhum registro encontrado.</p>";
+        } else {
+          snapshot.forEach(renderizarCadastro);
+        }
+      });
     });
-  
-      // Registro de visita no Firestore
-      try {
-        const db = firebase.firestore();
-        db.collection("visitas").add({
-          data: new Date().toISOString(),
-          ip: null,
-          userAgent: navigator.userAgent
-        });
-      } catch(e) {
-        console.warn("Erro ao registrar visita:", e);
-      }
-
-</script>
+  </script>
 
   <footer>
-    <small>
-      Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.
-    </small>
+    <small>Prestar serviços de gestão integrada no apoio ao transporte de passageiros e atendimento ao cidadão - SPTerminais Noroeste.</small>
   </footer>
 </body>
 </html>
